@@ -49,13 +49,16 @@ export async function Navbar() {
             </>
           ) : (
             <>
-              {role === 'admin' ? (
-                <Link href="/admin" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-                  Admin Portal
-                </Link>
-              ) : (
-                <Link href="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-                  Dashboard
+              <Link href="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                Dashboard
+              </Link>
+              
+              {role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-all"
+                >
+                  Admin
                 </Link>
               )}
               
