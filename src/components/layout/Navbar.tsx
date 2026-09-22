@@ -18,7 +18,7 @@ export async function Navbar() {
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const profile = data as any;
-    role = profile?.role;
+    role = typeof profile?.role === 'string' ? profile.role.trim() : null;
   }
 
   return (
