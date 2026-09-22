@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import Stripe from 'stripe'
 
@@ -14,6 +14,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing stripe signature or secret' }, { status: 400 })
     }
     
+    const stripe = getStripe()
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -59,6 +60,7 @@ export async function POST(req: Request) {
         // Actually, Stripe creates the customer during checkout, we should retrieve the user_id from metadata of the subscription or customer.
         // Let's fix this by finding the user ID.
         // If it's a new subscription, we might need to search the customer.
+        const stripe = getStripe()
         const customer = await stripe.customers.retrieve(customerId)
         let userId = (customer as Stripe.Customer).metadata?.userId || subscription.metadata?.userId;
         

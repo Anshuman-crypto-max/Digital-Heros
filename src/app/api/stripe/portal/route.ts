@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function POST(request: Request) {
   try {
@@ -9,6 +9,13 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.headers.get('origin') || 'http://localhost:3000'
+
+    if (process.env.PAYMENT_MODE === 'demo') {
+      // In demo mode, redirect back to dashboard or mock portal
+      return NextResponse.json({ url: `${baseUrl}/dashboard` })
     }
 
     // Get the user's stripe customer id from their subscription
@@ -22,12 +29,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No active subscription found' }, { status: 400 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.headers.get('origin') || 'http://localhost:3000'
-
+    const stripe = getStripe()
     // Create Customer Portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
       return_url: `${baseUrl}/dashboard`,
+
     })
 
     return NextResponse.json({ url: portalSession.url })

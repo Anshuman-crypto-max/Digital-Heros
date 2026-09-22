@@ -1,13 +1,19 @@
+import 'server-only'
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('Stripe: Missing STRIPE_SECRET_KEY in environment variables.')
-}
+export function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2026-08-26.dahlia' as any, // Type override for strict SDK versioning
-  appInfo: {
-    name: 'Digital Heroes',
-    version: '0.1.0',
-  },
-})
+  if (!key) {
+    throw new Error(
+      'STRIPE_SECRET_KEY is required when Stripe payment mode is enabled.'
+    )
+  }
+
+  return new Stripe(key, {
+    apiVersion: '2026-08-26.dahlia' as any,
+    appInfo: {
+      name: 'Digital Heroes',
+    },
+  })
+}
