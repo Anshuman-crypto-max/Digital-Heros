@@ -85,3 +85,42 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+export async function resetPassword(formData: FormData) {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://digital-heros-v8lx.onrender.com'
+  
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${baseUrl}/auth/callback?next=/reset-password`,
+  })
+
+  if (error) {
+    redirect('/forgot-password?error=' + encodeURIComponent(error.message))
+  }
+
+  redirect('/forgot-password?message=' + encodeURIComponent('Check your email for the reset link.'))
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+  
+  if (password !== confirmPassword) {
+    redirect('/reset-password?error=' + encodeURIComponent('Passwords do not match.'))
+  }
+
+  if (password.length < 6) {
+    redirect('/reset-password?error=' + encodeURIComponent('Password must be at least 6 characters.'))
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    redirect('/reset-password?error=' + encodeURIComponent(error.message))
+  }
+
+  redirect('/dashboard')
+}
